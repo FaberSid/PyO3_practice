@@ -1,0 +1,5 @@
+{
+    "rust-analyzer.cargo.extraEnv": {
+        "PYO3_PYTHON": "${workspaceFolder}/practice/.venv/Scripts/python.exe"
+    }
+}

@@ -1,0 +1,13 @@
+[package]
+name = "practice"
+edition = "2024"
+
+[lib]
+name = "practice"
+crate-type = ["cdylib"]
+
+[dependencies]
+practice-core = { path = "../practice_core" }
+pyo3 = { version = "0.28.2", features = ["extension-module"] }
+pythonize = "0.28.0"
+serde = { version = "1.0.228", features = ["derive"] }
