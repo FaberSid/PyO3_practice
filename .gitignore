@@ -29,4 +29,7 @@ venv.bak/
 # will have compiled files and executables
 debug/
 
+# MSVC Windows builds of rustc generate these, which store debugging information
+*.pdb
+
 # End of https://www.toptal.com/developers/gitignore/api/python,rust

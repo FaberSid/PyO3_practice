@@ -5,10 +5,18 @@ use pyo3::prelude::*;
 use pythonize::depythonize;
 use serde::Deserialize;
 
+#[pyclass(get_all)]
 #[derive(Debug, Deserialize)]
 struct UserData {
     id: u64,
     name: String,
+}
+
+#[pymethods]
+impl UserData {
+    fn __repr__(&self) -> String {
+        format!("UserData(id={}, name=\"{}\")", self.id, self.name)
+    }
 }
 
 impl<'a, 'py> FromPyObject<'a, 'py> for UserData {
@@ -34,6 +42,24 @@ fn check_user(data: UserData) -> PyResult<String> {
     ))
 }
 
+// 単一のデータを返す
+#[pyfunction]
+fn get_user() -> UserData {
+    UserData {
+        id: 1,
+        name: "田中".to_string(),
+    }
+}
+
+// 複数のデータをリストで返す
+#[pyfunction]
+fn get_users() -> Vec<UserData> {
+    vec![
+        UserData { id: 1, name: "田中".to_string() },
+        UserData { id: 2, name: "佐藤".to_string() },
+    ]
+}
+
 #[pyfunction]
 fn hello() -> PyResult<String> {
     Ok(get_message())
@@ -47,6 +73,9 @@ fn practice_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     m.add_function(wrap_pyfunction!(hello, m)?)?;
     m.add_function(wrap_pyfunction!(check_user, m)?)?;
+    m.add_function(wrap_pyfunction!(get_user, m)?)?;
+    m.add_function(wrap_pyfunction!(get_users, m)?)?;
+    m.add_class::<UserData>()?;
     Ok(())
 }
 
