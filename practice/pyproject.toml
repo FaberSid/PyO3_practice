@@ -6,7 +6,6 @@ readme = "README.md"
 requires-python = ">=3.14"
 
 [tool.maturin]
-module-name = "practice"
 python-source = "python"
 
 [build-system]
@@ -16,4 +15,13 @@ build-backend = "maturin"
 [dependency-groups]
 dev = [
     "maturin>=1.12.6",
+]
+
+[tool.uv]
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "Cargo.toml" },
+    { file = "src/**/*.rs" },
+    { file = "../practice_core/Cargo.toml" },
+    { file = "../practice_core/src/**/*.rs" },
 ]
