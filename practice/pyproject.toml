@@ -21,7 +21,9 @@ dev = [
 cache-keys = [
     { file = "pyproject.toml" },
     { file = "Cargo.toml" },
+    { file = "build.rs" },
     { file = "src/**/*.rs" },
     { file = "../practice_core/Cargo.toml" },
+    { file = "../practice_core/build.rs" },
     { file = "../practice_core/src/**/*.rs" },
 ]
