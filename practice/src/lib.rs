@@ -83,9 +83,12 @@ fn check_version_consistency() {
     // 1. ビルド時のSHA1 (env! マクロで取得)
     let build_sha1 = env!("BUILD_GIT_SHA1");
 
+    let manifest_dir = env!("CARGO_MANIFEST_DIR");
+
     // 2. 実行時の最新SHA1を取得
     let current_sha1 = Command::new("git")
         .args(&["rev-parse", "HEAD"])
+        .current_dir(manifest_dir)
         .output()
         .ok()
         .and_then(|o| {
