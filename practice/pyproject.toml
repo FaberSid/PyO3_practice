@@ -7,6 +7,7 @@ requires-python = ">=3.14"
 
 [tool.maturin]
 python-source = "python"
+module-name = "practice._practice"
 
 [build-system]
 requires = ["maturin>=1.0,<2.0"]

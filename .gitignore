@@ -33,3 +33,5 @@ debug/
 *.pdb
 
 # End of https://www.toptal.com/developers/gitignore/api/python,rust
+
+practice/python/practice/**/*.pyi

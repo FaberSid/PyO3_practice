@@ -1,11 +1,13 @@
 use std::process::Command;
 
 use practice_core::get_message;
-use pyo3::prelude::*;
+use pyo3::{prelude::*, wrap_pymodule};
+use pyo3_stub_gen::{define_stub_info_gatherer, derive::{gen_stub_pyclass, gen_stub_pyfunction}};
 use pythonize::depythonize;
 use serde::Deserialize;
 
-#[pyclass(get_all)]
+#[gen_stub_pyclass]
+#[pyclass(module = "practice", get_all)]
 #[derive(Debug, Deserialize)]
 struct UserData {
     id: u64,
@@ -34,6 +36,7 @@ impl<'a, 'py> FromPyObject<'a, 'py> for UserData {
     }
 }
 
+#[gen_stub_pyfunction(module = "practice")]
 #[pyfunction]
 fn check_user(data: UserData) -> PyResult<String> {
     Ok(format!(
@@ -55,8 +58,14 @@ fn get_user() -> UserData {
 #[pyfunction]
 fn get_users() -> Vec<UserData> {
     vec![
-        UserData { id: 1, name: "田中".to_string() },
-        UserData { id: 2, name: "佐藤".to_string() },
+        UserData {
+            id: 1,
+            name: "田中".to_string(),
+        },
+        UserData {
+            id: 2,
+            name: "佐藤".to_string(),
+        },
     ]
 }
 
@@ -65,9 +74,21 @@ fn hello() -> PyResult<String> {
     Ok(get_message())
 }
 
+#[gen_stub_pyfunction(module = "practice.submodule")]
+#[pyfunction]
+fn submodule_function() -> String {
+    "Function submodule_function called!".to_string()
+}
+
 #[pymodule]
-#[pyo3(name = "practice")]
-fn practice_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
+#[pyo3(name = "submodule")]
+fn submodule(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(b, m)?)?;
+    Ok(())
+}
+
+#[pymodule]
+fn _practice(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // 1. インポート時に SHA1 チェックを実行
     check_version_consistency();
 
@@ -75,6 +96,9 @@ fn practice_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(check_user, m)?)?;
     m.add_function(wrap_pyfunction!(get_user, m)?)?;
     m.add_function(wrap_pyfunction!(get_users, m)?)?;
+    
+    m.add_wrapped(wrap_pymodule!(submodule))?;
+
     m.add_class::<UserData>()?;
     Ok(())
 }
@@ -92,7 +116,11 @@ fn check_version_consistency() {
         .output()
         .ok()
         .and_then(|o| {
-            if o.status.success() { String::from_utf8(o.stdout).ok() } else { None }
+            if o.status.success() {
+                String::from_utf8(o.stdout).ok()
+            } else {
+                None
+            }
         })
         .map(|s| s.trim().to_string())
         .unwrap_or_else(|| "Unknown".to_string()); // ここも揃える
@@ -100,9 +128,7 @@ fn check_version_consistency() {
     // 3. 厳格に比較。不一致なら即警告。
     if build_sha1 != current_sha1 {
         // 安全に 7文字取るヘルパー
-        let to_display = |s: &str| -> String {
-            s.chars().take(7).collect::<String>()
-        };
+        let to_display = |s: &str| -> String { s.chars().take(7).collect::<String>() };
 
         let b_display = to_display(build_sha1);
         let c_display = to_display(&current_sha1);
@@ -112,8 +138,9 @@ fn check_version_consistency() {
              Binary build SHA1: {}\n\
              Current Git SHA1:  {}\n\
              \x1b[36mAction: Please run 'uv run maturin develop' to update.\x1b[0m\n",
-            b_display,
-            c_display
+            b_display, c_display
         );
     }
 }
+
+define_stub_info_gatherer!(stub_info);
